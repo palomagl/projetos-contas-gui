@@ -1,77 +1,77 @@
-# Fluxo — Contas a Pagar e Receber
+# Fluxo. — Contas a Pagar e Receber
 
-Aplicativo desktop feito em **Python + Tkinter** para organizar receitas, despesas, vencimentos e pagamentos. Interface renovada, sem instalar bibliotecas externas e sem banco de dados.
+**Um controle financeiro desktop, simples de usar e feito inteiramente em Python.** Cadastre receitas e despesas, acompanhe vencimentos e entenda quanto já entrou, quanto saiu e o que ainda falta pagar ou receber — em uma interface clara, sem planilhas complicadas.
 
-## O que mudou
+![Tela principal do Fluxo, com dados fictícios de novembro e dezembro de 2026](docs/img/tela-principal.webp)
 
-- **Cadastro e edição separados**: clicar numa linha só a seleciona. Para editar, clique em **Editar** (ou dê duplo clique). Depois de salvar, o formulário volta automaticamente a **Novo lançamento**.
-- **Novo lançamento sempre disponível** no canto superior direito; **Esc** cancela a edição.
-- **Resumo mais claro**: saldo realizado considera apenas valores pagos/recebidos. A receber, a pagar e vencidas são mostrados separadamente. Os indicadores acompanham os filtros da tabela.
-- Interface mais limpa, com pesquisa, filtros, tabela, formulário e gráfico por mês.
-- Mudança de status, edição, exclusão confirmada e exportação CSV.
-- Salvamento automático no `contas.txt`, com substituição atômica: se a gravação falhar, o arquivo antigo continua intacto.
-- Dados financeiros locais não são enviados para GitHub (`contas.txt` está no `.gitignore`).
+> **Experimente sem configurar nada:** na primeira execução, o Fluxo carrega exemplos fictícios de **novembro e dezembro de 2026**. São lançamentos para demonstração, não dados reais. Você pode editar, excluir e adicionar suas próprias contas.
 
-## Rodar no PyCharm
+## O que dá para fazer
 
-1. Abra a pasta que contém `main.py` no PyCharm.
-2. Configure um interpretador **Python 3.8 ou superior**.
-3. Clique com o botão direito em `main.py` e escolha **Run 'main'**.
+| Recurso | Na prática |
+| --- | --- |
+| **Visão geral** | Saldo realizado, valores a receber/a pagar e contas atrasadas |
+| **Lançamentos** | Criar, editar, excluir, marcar como pago ou reabrir |
+| **Organização** | Busca sem distinção de acentos, filtros por tipo, situação e mês, ordenação nas colunas |
+| **Gráfico mensal** | Comparar receitas e despesas previstas em cada mês |
+| **Exportação** | Gerar relatório `.csv` para abrir no Excel |
+| **Dados locais** | Informações salvas automaticamente em `contas.txt`, sem conta online nem banco de dados |
 
-Ou abra o terminal na pasta do projeto:
+![Gráfico mensal do Fluxo com dados fictícios](docs/img/grafico-mensal.webp)
+
+## Baixar e executar
+
+**Requisitos:** Python 3.8 ou superior, com Tkinter (normalmente incluído no instalador do Windows). Não é necessário `pip install`.
+
+1. Clique em **Code → Download ZIP** neste repositório e extraia a pasta; ou clone com `git clone https://github.com/palomagl/projetos-contas-gui.git`.
+2. Abra a pasta no **PyCharm** (ou outro editor) e configure um interpretador Python.
+3. Execute `main.py` pelo botão **Run** ou pelo terminal:
 
 ```bash
 python main.py
 ```
 
-No Windows, se `python` não funcionar, use `py main.py`. O Tkinter normalmente já acompanha a instalação do Python para Windows.
+No Windows, caso `python` não seja reconhecido, execute `py main.py`.
 
-## Primeiro uso / dados de demonstração
+### Dados de demonstração e dados pessoais
 
-O programa começa vazio se não existir `contas.txt`. Para testar com lançamentos fictícios, copie `docs/exemplo_contas.txt` para `contas.txt`, na mesma pasta de `main.py`, **antes** de abrir o aplicativo.
+- Na **primeira execução**, se não existir `contas.txt`, o sistema copia os exemplos de `docs/exemplo_contas.txt` para o arquivo local.
+- Se `contas.txt` já existir, **ele nunca será substituído por exemplos**, mesmo que esteja vazio.
+- Para começar do zero, feche o aplicativo, abra `contas.txt` ao lado de `main.py` e apague seu conteúdo (mantenha o arquivo vazio).
+- Para voltar à demonstração, feche o aplicativo e copie o conteúdo de `docs/exemplo_contas.txt` para `contas.txt` (faça um backup antes se tiver dados reais).
+- O `contas.txt` está no `.gitignore` para impedir o envio acidental de lançamentos pessoais ao GitHub.
 
-Se você já usava a versão antiga, mantenha uma cópia do seu `contas.txt` e coloque-a ao lado do `main.py` novo. O formato de dados continua compatível.
+## Uso rápido
 
-## Como usar
+**Novo lançamento:** preencha os campos à direita e clique em **Adicionar lançamento**. Para editar, selecione uma linha e clique em **Editar** (ou dê dois cliques); depois de salvar, o formulário fica livre para uma nova conta. Um clique simples na tabela **não inicia a edição**.
 
-- **Cadastrar:** preencha o formulário e clique em **Adicionar lançamento**.
-- **Editar:** selecione uma linha e clique em **Editar**; salve as alterações. O formulário será liberado para um novo cadastro.
-- **Cancelar edição / cadastrar outra:** clique em **Cancelar**, **+ Novo lançamento** ou **Esc**.
-- **Pagar / reabrir:** selecione a linha e clique em **Marcar como pago/pendente**.
-- **Excluir:** selecione a conta e clique em **Excluir**. Há confirmação antes da exclusão.
-- **Buscar:** digite parte da descrição. A busca ignora acentos.
-- **Filtrar:** selecione tipo, situação ou mês. Clique em **Limpar** para remover os filtros.
-- **Ordenar:** clique em qualquer coluna da tabela, uma segunda vez inverte a ordem.
-- **Gráfico mensal:** consulte receitas e despesas previstas por vencimento (até seis meses mais recentes dos lançamentos filtrados).
-- **Exportar:** salva um CSV separado por `;` que abre no Excel.
+Use a busca e os filtros para encontrar registros. Para pagamentos, selecione a conta e escolha **Marcar como pago**. O saldo realizado considera somente receitas recebidas e despesas pagas; valores pendentes aparecem separadamente. Os indicadores e o gráfico acompanham os filtros aplicados.
 
-Atalhos: **Enter** nos campos salva, **Esc** volta para novo lançamento, **Ctrl+F** foca a busca, **Delete** na tabela exclui a conta selecionada.
+**Atalhos:** `Ctrl+F` pesquisar · `Enter` salvar no formulário · `Esc` novo lançamento/cancelar edição · `Delete` excluir a conta selecionada na tabela.
 
-## Estrutura
+## Tecnologias e organização
+
+- **Python 3.8+** e **Tkinter/ttk**: interface nativa, sem dependências extras.
+- **Listas, tuplas e dicionários**: gerenciamento dos lançamentos em memória.
+- **TXT local**: persistência com gravação atômica, sem banco de dados.
+- **Testes `unittest`**: validação, cálculo, filtros e persistência.
 
 ```text
 projeto_contas_gui/
-├── main.py                  # Entrada da aplicação
-├── services/
-│   └── finance_manager.py   # CRUD, TXT, filtros, cálculos, exportação
-├── views/
-│   └── app_gui.py           # Interface Tkinter
+├── main.py                   # inicia a aplicação e prepara exemplos no primeiro uso
+├── views/app_gui.py          # tela, formulários e gráfico Canvas
+├── services/finance_manager.py  # regras, filtros e arquivo TXT
 ├── docs/
-│   ├── estrutura_dados.md   # Fundamentos de listas, tuplas e dicionários
-│   └── exemplo_contas.txt   # Dados fictícios de exemplo
-├── tests/
-│   └── test_finance_manager.py
-└── README.md
+│   ├── img/                 # capturas da aplicação
+│   ├── exemplo_contas.txt   # lançamentos fictícios nov/dez 2026
+│   └── estrutura_dados.md   # explicação para a disciplina
+└── tests/test_finance_manager.py
 ```
 
-## Testes
+Para rodar os testes:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-Todas as regras usam a biblioteca padrão do Python. A GUI utiliza `tkinter`/`ttk`, e o gráfico utiliza `tk.Canvas`.
-
-## Observação sobre saldo
-
-**Saldo realizado** = soma das receitas **pagas/recebidas** − soma das despesas **pagas**. Receitas e despesas **pendentes** não afetam o saldo realizado; aparecem nos indicadores a receber e a pagar. Os números exibidos refletem os filtros atuais.
+> Projeto acadêmico de **Programação em Python**, desenvolvido para exercitar operações CRUD, estruturas de dados, persistência local e construção de interfaces. As capturas acima apresentam dados fictícios.

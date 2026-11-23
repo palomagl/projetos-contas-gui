@@ -39,8 +39,8 @@ class AppContas:
         self._aviso_agendado = None
 
         janela.title('Fluxo — Contas a Pagar e Receber')
-        janela.geometry('1250x800')
-        janela.minsize(1000, 670)
+        janela.geometry('1250x780')
+        janela.minsize(1000, 680)
         janela.configure(bg=C['bg'])
         self._configurar_fontes()
         self._configurar_estilos()
@@ -84,7 +84,7 @@ class AppContas:
                                               foreground=[('readonly', C['text'])])
         estilo.configure('Tabela.Treeview', font=self.fonte_normal,
                          background=C['panel'], fieldbackground=C['panel'],
-                         foreground=C['text'], rowheight=39, borderwidth=0,
+                         foreground=C['text'], rowheight=36, borderwidth=0,
                          relief='flat')
         estilo.map('Tabela.Treeview', background=[('selected', C['brand_soft'])],
                                               foreground=[('selected', C['text'])])
@@ -114,14 +114,14 @@ class AppContas:
                         highlightthickness=1, **kwargs)
 
     def _montar_tela(self):
-        principal = tk.Frame(self.janela, bg=C['bg'], padx=27, pady=22)
+        principal = tk.Frame(self.janela, bg=C['bg'], padx=23, pady=16)
         principal.pack(fill='both', expand=True)
 
         cabecalho = tk.Frame(principal, bg=C['bg'])
-        cabecalho.pack(fill='x', pady=(0, 18))
+        cabecalho.pack(fill='x', pady=(0, 12))
         marca = tk.Frame(cabecalho, bg=C['bg'])
         marca.pack(side='left')
-        self._texto(marca, 'fluxo.', fonte=(self.fonte, 26, 'bold'),
+        self._texto(marca, 'fluxo.', fonte=(self.fonte, 25, 'bold'),
                     cor=C['brand'], bg=C['bg']).pack(anchor='w')
         self._texto(marca, 'CONTAS A PAGAR E RECEBER',
                     fonte=(self.fonte, 9, 'bold'), cor=C['muted'], bg=C['bg']).pack(anchor='w')
@@ -129,7 +129,7 @@ class AppContas:
                    style='Principal.TButton', command=self.novo_lancamento).pack(side='right', pady=7)
 
         resumo = tk.Frame(principal, bg=C['bg'])
-        resumo.pack(fill='x', pady=(0, 18))
+        resumo.pack(fill='x', pady=(0, 13))
         for i in range(4):
             resumo.columnconfigure(i, weight=1, uniform='resumo')
         self.metricas = {}
@@ -140,7 +140,7 @@ class AppContas:
             ('atrasadas', 'CONTAS ATRASADAS', C['amber']),
         )
         for indice, (chave, titulo, destaque) in enumerate(cards):
-            card = self._painel(resumo, padx=17, pady=15)
+            card = self._painel(resumo, padx=17, pady=12)
             card.grid(row=0, column=indice, sticky='nsew',
                       padx=(0, 9) if indice < 3 else 0)
             self._texto(card, titulo, fonte=(self.fonte, 9, 'bold'),
@@ -152,10 +152,10 @@ class AppContas:
             self.metricas[chave] = (valor, legenda)
 
         faixas = tk.Frame(principal, bg=C['bg'])
-        faixas.pack(fill='x', pady=(0, 11))
+        faixas.pack(fill='x', pady=(0, 10))
         self.btn_aba_contas = self._aba(faixas, 'Lançamentos', 0)
         self.btn_aba_grafico = self._aba(faixas, 'Gráfico mensal', 1)
-        self.lbl_aviso = self._texto(faixas, 'Indicadores acompanham os filtros',
+        self.lbl_aviso = self._texto(faixas, 'Resumo atualizado com os filtros',
                                     fonte=self.fonte_pequena, cor=C['muted'], bg=C['bg'])
         self.lbl_aviso.pack(side='right', pady=9)
 
@@ -194,11 +194,11 @@ class AppContas:
 
     def _montar_lancamentos(self):
         self.area_lancamentos.columnconfigure(0, weight=1)
-        self.area_lancamentos.columnconfigure(1, minsize=325)
+        self.area_lancamentos.columnconfigure(1, minsize=335)
         self.area_lancamentos.rowconfigure(0, weight=1)
-        lista = self._painel(self.area_lancamentos, padx=16, pady=15)
+        lista = self._painel(self.area_lancamentos, padx=16, pady=13)
         lista.grid(row=0, column=0, sticky='nsew', padx=(0, 14))
-        painel_form = self._painel(self.area_lancamentos, padx=18, pady=13)
+        painel_form = self._painel(self.area_lancamentos, padx=18, pady=12)
         painel_form.grid(row=0, column=1, sticky='nsew')
         self._montar_tabela(lista)
         self._montar_formulario(painel_form)
@@ -211,15 +211,21 @@ class AppContas:
                    command=self.exportar).pack(side='right')
 
         busca_linha = tk.Frame(pai, bg=C['panel'])
-        busca_linha.pack(fill='x', pady=(15, 9))
+        busca_linha.pack(fill='x', pady=(11, 8))
         self.entry_busca = tk.Entry(busca_linha, textvariable=self.var_busca,
                                     font=self.fonte_normal, bg=C['soft'], fg=C['text'],
                                     insertbackground=C['text'], relief='flat',
                                     highlightthickness=1, highlightbackground=C['border'],
                                     highlightcolor=C['brand'])
-        self.entry_busca.pack(side='left', fill='x', expand=True, ipady=9)
-        self._texto(busca_linha, '  Buscar descrição', fonte=self.fonte_pequena,
-                    cor=C['muted']).pack(side='left')
+        self.entry_busca.pack(fill='x', expand=True, ipady=8)
+        self.placeholder_busca = self._texto(self.entry_busca,
+                                            '  Buscar por descrição ou palavra-chave...',
+                                            fonte=self.fonte_pequena, cor=C['muted'], bg=C['soft'],
+                                            cursor='xterm')
+        self.placeholder_busca.place(x=7, rely=0.5, anchor='w')
+        self.placeholder_busca.bind('<Button-1>', lambda event: self.entry_busca.focus_set())
+        self.entry_busca.bind('<FocusIn>', lambda event: self.placeholder_busca.place_forget())
+        self.entry_busca.bind('<FocusOut>', lambda event: self._atualizar_placeholder())
 
         filtros = tk.Frame(pai, bg=C['panel'])
         filtros.pack(fill='x', pady=(0, 11))
@@ -291,18 +297,22 @@ class AppContas:
                                      command=self.editar_selecionada)
         self.btn_editar.pack(side='right')
         self._atualizar_acoes()
-        self.var_busca.trace_add('write', lambda *args: self.atualizar_tela())
+        self.var_busca.trace_add('write', lambda *args: (self._atualizar_placeholder(), self.atualizar_tela()))
 
     def _campo(self, pai, rotulo, variavel, *, largura=28):
-        self._texto(pai, rotulo, fonte=self.fonte_forte).pack(anchor='w', pady=(8, 3))
+        self._texto(pai, rotulo, fonte=self.fonte_forte).pack(anchor='w', pady=(7, 2))
         entrada = tk.Entry(pai, textvariable=variavel, font=(self.fonte, 11),
                            bg=C['soft'], fg=C['text'], insertbackground=C['text'],
                            relief='flat', highlightthickness=1,
                            highlightbackground=C['border'], highlightcolor=C['brand'])
-        entrada.pack(fill='x', ipady=6)
+        entrada.pack(fill='x', ipady=5)
         return entrada
 
     def _montar_formulario(self, pai):
+        # Ação principal fixa no rodapé, inclusive em telas menores.
+        self.btn_salvar = ttk.Button(pai, text='Adicionar lançamento',
+                                     style='Principal.TButton', command=self.salvar_formulario)
+        self.btn_salvar.pack(side='bottom', fill='x', pady=(10, 0))
         cabecalho = tk.Frame(pai, bg=C['panel'])
         cabecalho.pack(fill='x')
         self.lbl_modo = self._texto(cabecalho, 'Novo lançamento', fonte=self.fonte_secao)
@@ -317,19 +327,16 @@ class AppContas:
         self.entry_descricao = self._campo(pai, 'Descrição', self.var_descricao)
         self.entry_valor = self._campo(pai, 'Valor (R$)', self.var_valor)
         self.entry_vencimento = self._campo(pai, 'Vencimento (dd/mm/aaaa)', self.var_vencimento)
-        self._texto(pai, 'Tipo', fonte=self.fonte_forte).pack(anchor='w', pady=(8, 3))
+        self._texto(pai, 'Tipo', fonte=self.fonte_forte).pack(anchor='w', pady=(7, 2))
         self.combo_tipo = ttk.Combobox(pai, textvariable=self.var_tipo,
                                        values=fm.TIPOS, state='readonly',
                                        style='Filtros.TCombobox')
         self.combo_tipo.pack(fill='x')
-        self._texto(pai, 'Situação', fonte=self.fonte_forte).pack(anchor='w', pady=(8, 3))
+        self._texto(pai, 'Situação', fonte=self.fonte_forte).pack(anchor='w', pady=(7, 2))
         self.combo_status = ttk.Combobox(pai, textvariable=self.var_status,
                                          values=fm.STATUS_OPCOES, state='readonly',
                                          style='Filtros.TCombobox')
         self.combo_status.pack(fill='x')
-        self.btn_salvar = ttk.Button(pai, text='Adicionar lançamento',
-                                     style='Principal.TButton', command=self.salvar_formulario)
-        self.btn_salvar.pack(fill='x', pady=(15, 6))
         self.entry_valor.bind('<FocusOut>', self._formatar_valor)
 
     def _montar_grafico(self):
@@ -370,6 +377,12 @@ class AppContas:
             return False, None
         self.contas = copia
         return True, resultado
+
+    def _atualizar_placeholder(self):
+        if not self.var_busca.get().strip() and self.janela.focus_get() != self.entry_busca:
+            self.placeholder_busca.place(x=7, rely=0.5, anchor='w')
+        else:
+            self.placeholder_busca.place_forget()
 
     def _filtros_ativos(self):
         return (bool(self.var_busca.get().strip()) or
@@ -602,7 +615,7 @@ class AppContas:
         if self._aviso_agendado is not None:
             self.janela.after_cancel(self._aviso_agendado)
         self._aviso_agendado = self.janela.after(6500, lambda: self.lbl_aviso.configure(
-            text='Indicadores acompanham os filtros', fg=C['muted']))
+            text='Resumo atualizado com os filtros', fg=C['muted']))
 
     def desenhar_grafico(self):
         canvas = self.grafico

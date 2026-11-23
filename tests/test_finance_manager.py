@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from services import finance_manager as fm
+from main import inicializar_exemplo
 
 
 class TestFinanceManager(unittest.TestCase):
@@ -19,6 +20,15 @@ class TestFinanceManager(unittest.TestCase):
 
     def tearDown(self):
         self.diretorio.cleanup()
+
+    def test_primeira_execucao_cria_exemplos_sem_sobrescrever(self):
+        self.assertTrue(inicializar_exemplo(self.arquivo))
+        contas = fm.carregar_contas(self.arquivo)
+        self.assertEqual(len(contas), 18)
+        self.assertEqual(set(fm.listar_meses(contas)), {'2026-11', '2026-12'})
+        Path(self.arquivo).write_text('meus dados', encoding='utf-8')
+        self.assertFalse(inicializar_exemplo(self.arquivo))
+        self.assertEqual(Path(self.arquivo).read_text(encoding='utf-8'), 'meus dados')
 
     def test_valores_brasileiros(self):
         self.assertEqual(fm.converter_valor('1.200,50'), 1200.5)

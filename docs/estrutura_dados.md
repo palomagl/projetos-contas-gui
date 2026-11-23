@@ -109,7 +109,7 @@ Regras do arquivo:
 - O valor usa **ponto** como separador decimal (`1200.50`, não `1200,50`)
 - O arquivo **não tem linha de cabeçalho**: toda linha é uma conta
 - Linhas que não tiverem exatamente 6 campos são ignoradas na leitura
-- Se o arquivo não existir, o programa começa com a lista vazia
+- Se o arquivo não existir na primeira execução, `main.py` copia `docs/exemplo_contas.txt` para `contas.txt` sem sobrescrever um arquivo já existente
 
 ## 5. Fluxo dos dados
 
@@ -163,8 +163,8 @@ Se algum dado estiver errado, essas funções levantam `ValueError` com uma mens
 | `calcular_pendencias(contas)` | Soma o que ainda falta receber e pagar       | `tuple` |
 | `esta_atrasada(conta)`        | Diz se a conta está pendente e já venceu     | `bool`  |
 
-`calcular_resumo` retorna `(total_receitas, total_despesas, saldo)`. Com o arquivo `exemplo_contas.txt`: `(4300.0, 1930.65, 2369.35)`.
-`calcular_pendencias` retorna `(a_receber, a_pagar)`. Com o arquivo `exemplo_contas.txt`: `(800.0, 1380.45)`.
+`calcular_resumo` retorna `(total_receitas, total_despesas, saldo)`. Os números dependem dos lançamentos presentes em `docs/exemplo_contas.txt`.
+`calcular_pendencias` retorna `(a_receber, a_pagar)`. Os números dependem dos lançamentos presentes em `docs/exemplo_contas.txt`.
 
 **Busca, filtros e ordenação**
 

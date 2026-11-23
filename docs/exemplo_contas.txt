@@ -1,6 +1,18 @@
-1;Salário;3500.00;Receita;05/11/2026;Pago
-2;Aluguel;1200.00;Despesa;10/11/2026;Pendente
-3;Conta de luz;180.45;Despesa;15/11/2026;Pendente
-4;Internet;99.90;Despesa;20/11/2026;Pago
-5;Freelance site;800.00;Receita;25/11/2026;Pendente
-6;Supermercado;450.30;Despesa;12/11/2026;Pago
+1;Salário • novembro;4200.00;Receita;05/11/2026;Pago
+2;Aluguel;1250.00;Despesa;08/11/2026;Pago
+3;Supermercado;484.70;Despesa;12/11/2026;Pago
+4;Internet residencial;109.90;Despesa;15/11/2026;Pago
+5;Conta de luz;196.55;Despesa;19/11/2026;Pendente
+6;Academia;119.90;Despesa;21/11/2026;Pago
+7;Freelance · identidade visual;850.00;Receita;24/11/2026;Pendente
+8;Cartão de crédito;640.32;Despesa;27/11/2026;Pendente
+9;Assinatura de software;59.90;Despesa;29/11/2026;Pendente
+10;Salário • dezembro;4200.00;Receita;05/12/2026;Pendente
+11;Aluguel · dezembro;1250.00;Despesa;08/12/2026;Pendente
+12;Supermercado · dezembro;520.00;Despesa;12/12/2026;Pendente
+13;Internet · dezembro;109.90;Despesa;15/12/2026;Pendente
+14;Projeto de landing page;1400.00;Receita;18/12/2026;Pendente
+15;Energia · dezembro;205.60;Despesa;20/12/2026;Pendente
+16;Presente de Natal;180.00;Despesa;23/12/2026;Pendente
+17;Trabalho extra;600.00;Receita;26/12/2026;Pendente
+18;Transporte;165.00;Despesa;29/12/2026;Pendente
