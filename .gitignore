@@ -1,7 +1,13 @@
-node_modules
-# Keep environment variables out of version control
-.env
-/src/generated/prisma
-node_modules
-dev.db
-
+# Dados locais — não publicar lançamentos pessoais
+contas.txt
+*.tmp
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.idea/
+.pytest_cache/
+# Relatórios exportados
+relatorio_contas*.csv
+.DS_Store

@@ -1,0 +1,6 @@
+1;Salário;3500.00;Receita;05/11/2026;Pago
+2;Aluguel;1200.00;Despesa;10/11/2026;Pendente
+3;Conta de luz;180.45;Despesa;15/11/2026;Pendente
+4;Internet;99.90;Despesa;20/11/2026;Pago
+5;Freelance site;800.00;Receita;25/11/2026;Pendente
+6;Supermercado;450.30;Despesa;12/11/2026;Pago
