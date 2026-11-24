@@ -14,13 +14,16 @@ from services import finance_manager as fm
 
 
 C = {
-    'bg': '#F5F7FB', 'panel': '#FFFFFF', 'text': '#17263C',
-    'muted': '#66768B', 'border': '#E4EAF2', 'line': '#EDF1F6',
-    'brand': '#2459DD', 'brand_hover': '#1948BD',
-    'brand_soft': '#EAF0FF', 'green': '#17805A', 'green_soft': '#EAF7F0',
-    'red': '#C24148', 'red_soft': '#FFF0F1', 'amber': '#A66616',
-    'amber_soft': '#FFF5E8', 'soft': '#F8FAFD',
+    'bg': '#F3F5F9', 'panel': '#FFFFFF', 'text': '#192638',
+    'muted': '#738199', 'border': '#E7ECF3', 'line': '#EBEFF5',
+    'brand': '#495FE8', 'brand_hover': '#344CCC',
+    'brand_soft': '#EDF0FF', 'green': '#16856F', 'green_soft': '#EAF7F2',
+    'red': '#D15A61', 'red_soft': '#FFF1F1', 'amber': '#AD752A',
+    'amber_soft': '#FFF7EC', 'soft': '#F7F9FC',
+    'navy': '#142135', 'navy_hover': '#213551', 'navy_muted': '#90A1BD',
+    'hero': '#192C48', 'hero_light': '#BACAF5',
 }
+
 
 
 class AppContas:
@@ -37,10 +40,11 @@ class AppContas:
         self.ordem = ('vencimento', False)
         self._silenciar_filtros = False
         self._aviso_agendado = None
+        self.modal = None
 
         janela.title('Fluxo — Contas a Pagar e Receber')
-        janela.geometry('1250x780')
-        janela.minsize(1000, 680)
+        janela.geometry('1360x810')
+        janela.minsize(1040, 690)
         janela.configure(bg=C['bg'])
         self._configurar_fontes()
         self._configurar_estilos()
@@ -48,7 +52,7 @@ class AppContas:
         self._montar_tela()
         self._registrar_atalhos()
         self._carregar()
-        self.novo_lancamento(focar=False)
+        self._limpar_formulario()
         self.atualizar_tela()
 
     def _configurar_fontes(self):
@@ -84,7 +88,7 @@ class AppContas:
                                               foreground=[('readonly', C['text'])])
         estilo.configure('Tabela.Treeview', font=self.fonte_normal,
                          background=C['panel'], fieldbackground=C['panel'],
-                         foreground=C['text'], rowheight=36, borderwidth=0,
+                         foreground=C['text'], rowheight=43, borderwidth=0,
                          relief='flat')
         estilo.map('Tabela.Treeview', background=[('selected', C['brand_soft'])],
                                               foreground=[('selected', C['text'])])
@@ -114,70 +118,108 @@ class AppContas:
                         highlightthickness=1, **kwargs)
 
     def _montar_tela(self):
-        principal = tk.Frame(self.janela, bg=C['bg'], padx=23, pady=16)
-        principal.pack(fill='both', expand=True)
+        # Navegação fixa: os lançamentos têm a largura inteira, sem formulário lateral.
+        base = tk.Frame(self.janela, bg=C['bg'])
+        base.pack(fill='both', expand=True)
+        lateral = tk.Frame(base, bg=C['navy'], width=218)
+        lateral.pack(side='left', fill='y')
+        lateral.pack_propagate(False)
+        marca = tk.Frame(lateral, bg=C['navy'], padx=24, pady=28)
+        marca.pack(fill='x')
+        self._texto(marca, 'fluxo.', fonte=(self.fonte, 26, 'bold'),
+                    cor='#FFFFFF', bg=C['navy']).pack(anchor='w')
+        self._texto(marca, 'CONTROLE FINANCEIRO', fonte=(self.fonte, 8, 'bold'),
+                    cor=C['navy_muted'], bg=C['navy']).pack(anchor='w', pady=(4, 0))
 
+        tk.Frame(lateral, bg='#2A3B54', height=1).pack(fill='x', padx=22, pady=(7, 19))
+        self._texto(lateral, 'MENU', fonte=(self.fonte, 8, 'bold'),
+                    cor=C['navy_muted'], bg=C['navy']).pack(anchor='w', padx=25, pady=(0, 9))
+        self.botoes_menu = []
+        for indice, (rotulo, simbolo) in enumerate((('Lançamentos', '▤'), ('Gráfico mensal', '▥'))):
+            btn = tk.Button(lateral, text=f'  {simbolo}    {rotulo}', anchor='w',
+                            font=(self.fonte, 11, 'bold'), bg=C['navy'], fg='#C0CEE0',
+                            bd=0, relief='flat', padx=19, pady=14, cursor='hand2',
+                            activebackground=C['navy_hover'], activeforeground='#FFFFFF',
+                            command=lambda n=indice: self.mostrar_aba(n))
+            btn.pack(fill='x', padx=10, pady=2)
+            self.botoes_menu.append(btn)
+        rodape = tk.Frame(lateral, bg=C['navy'])
+        rodape.pack(side='bottom', fill='x', padx=22, pady=24)
+        tk.Frame(rodape, bg='#2A3B54', height=1).pack(fill='x', pady=(0, 15))
+        self._texto(rodape, '●  Dados salvos localmente', fonte=(self.fonte, 9),
+                    cor='#8FDCBA', bg=C['navy']).pack(anchor='w')
+        self._texto(rodape, 'Python · Tkinter · TXT', fonte=(self.fonte, 9),
+                    cor=C['navy_muted'], bg=C['navy']).pack(anchor='w', pady=(6, 0))
+
+        principal = tk.Frame(base, bg=C['bg'], padx=27, pady=23)
+        principal.pack(side='left', fill='both', expand=True)
         cabecalho = tk.Frame(principal, bg=C['bg'])
-        cabecalho.pack(fill='x', pady=(0, 12))
-        marca = tk.Frame(cabecalho, bg=C['bg'])
-        marca.pack(side='left')
-        self._texto(marca, 'fluxo.', fonte=(self.fonte, 25, 'bold'),
-                    cor=C['brand'], bg=C['bg']).pack(anchor='w')
-        self._texto(marca, 'CONTAS A PAGAR E RECEBER',
-                    fonte=(self.fonte, 9, 'bold'), cor=C['muted'], bg=C['bg']).pack(anchor='w')
-        ttk.Button(cabecalho, text='+  Novo lançamento',
-                   style='Principal.TButton', command=self.novo_lancamento).pack(side='right', pady=7)
+        cabecalho.pack(fill='x', pady=(0, 17))
+        header_textos = tk.Frame(cabecalho, bg=C['bg'])
+        header_textos.pack(side='left')
+        self._texto(header_textos, 'Visão geral', fonte=(self.fonte, 21, 'bold'),
+                    cor=C['text'], bg=C['bg']).pack(anchor='w')
+        self._texto(header_textos, 'Acompanhe seus lançamentos em um só lugar.',
+                    fonte=(self.fonte, 10), cor=C['muted'], bg=C['bg']).pack(anchor='w', pady=(3, 0))
+        ttk.Button(cabecalho, text='+   Novo lançamento', style='Principal.TButton',
+                   command=self.novo_lancamento).pack(side='right', pady=5)
+
+        # Saldo em um painel principal em vez de quatro cartões iguais.
+        destaque = tk.Frame(principal, bg=C['hero'], padx=26, pady=17)
+        destaque.pack(fill='x', pady=(0, 12))
+        col_esq = tk.Frame(destaque, bg=C['hero'])
+        col_esq.pack(side='left', fill='x', expand=True)
+        self._texto(col_esq, 'SALDO REALIZADO', fonte=(self.fonte, 9, 'bold'),
+                    cor=C['hero_light'], bg=C['hero']).pack(anchor='w')
+        self.saldo_valor = self._texto(col_esq, 'R$ 0,00', fonte=(self.fonte, 27, 'bold'),
+                                      cor='#FFFFFF', bg=C['hero'])
+        self.saldo_valor.pack(anchor='w', pady=(3, 2))
+        self.saldo_legenda = self._texto(col_esq, 'Recebimentos menos pagamentos',
+                                        fonte=(self.fonte, 10), cor='#BDCADF', bg=C['hero'])
+        self.saldo_legenda.pack(anchor='w')
+        col_dir = tk.Frame(destaque, bg=C['hero'])
+        col_dir.pack(side='right', anchor='e', padx=(10, 0))
+        self._texto(col_dir, 'SEU PANORAMA', fonte=(self.fonte, 9, 'bold'),
+                    cor=C['hero_light'], bg=C['hero']).pack(anchor='e', pady=(5, 7))
+        self._texto(col_dir, 'Receitas, despesas e prazos', fonte=(self.fonte, 10),
+                    cor='#E2EAF8', bg=C['hero']).pack(anchor='e')
+        self._texto(col_dir, 'atualizados conforme os filtros.', fonte=(self.fonte, 9),
+                    cor='#B9C5D7', bg=C['hero']).pack(anchor='e', pady=(3, 0))
 
         resumo = tk.Frame(principal, bg=C['bg'])
-        resumo.pack(fill='x', pady=(0, 13))
-        for i in range(4):
+        resumo.pack(fill='x', pady=(0, 16))
+        for i in range(3):
             resumo.columnconfigure(i, weight=1, uniform='resumo')
-        self.metricas = {}
-        cards = (
-            ('saldo', 'SALDO REALIZADO', C['brand']),
+        self.metricas = {'saldo': (self.saldo_valor, self.saldo_legenda)}
+        for indice, (chave, titulo, cor) in enumerate((
             ('receber', 'A RECEBER', C['green']),
             ('pagar', 'A PAGAR', C['red']),
-            ('atrasadas', 'CONTAS ATRASADAS', C['amber']),
-        )
-        for indice, (chave, titulo, destaque) in enumerate(cards):
-            card = self._painel(resumo, padx=17, pady=12)
-            card.grid(row=0, column=indice, sticky='nsew',
-                      padx=(0, 9) if indice < 3 else 0)
-            self._texto(card, titulo, fonte=(self.fonte, 9, 'bold'),
-                        cor=C['muted']).pack(anchor='w')
-            valor = self._texto(card, '—', fonte=(self.fonte, 19, 'bold'), cor=destaque)
-            valor.pack(anchor='w', pady=(8, 1))
-            legenda = self._texto(card, ' ', fonte=self.fonte_pequena, cor=C['muted'])
+            ('atrasadas', 'EM ATRASO', C['amber']),
+        )):
+            card = self._painel(resumo, padx=20, pady=13)
+            card.grid(row=0, column=indice, sticky='nsew', padx=(0, 12) if indice < 2 else 0)
+            tk.Frame(card, bg=cor, width=22, height=3).pack(anchor='w', pady=(0, 8))
+            self._texto(card, titulo, fonte=(self.fonte, 9, 'bold'), cor=C['muted']).pack(anchor='w')
+            valor = self._texto(card, '—', fonte=(self.fonte, 18, 'bold'), cor=C['text'])
+            valor.pack(anchor='w', pady=(4, 2))
+            legenda = self._texto(card, ' ', fonte=(self.fonte, 9), cor=C['muted'])
             legenda.pack(anchor='w')
             self.metricas[chave] = (valor, legenda)
 
-        faixas = tk.Frame(principal, bg=C['bg'])
-        faixas.pack(fill='x', pady=(0, 10))
-        self.btn_aba_contas = self._aba(faixas, 'Lançamentos', 0)
-        self.btn_aba_grafico = self._aba(faixas, 'Gráfico mensal', 1)
-        self.lbl_aviso = self._texto(faixas, 'Resumo atualizado com os filtros',
-                                    fonte=self.fonte_pequena, cor=C['muted'], bg=C['bg'])
-        self.lbl_aviso.pack(side='right', pady=9)
-
         self.area = tk.Frame(principal, bg=C['bg'])
         self.area.pack(fill='both', expand=True)
-        self.area_lancamentos = tk.Frame(self.area, bg=C['bg'])
+        self.area.columnconfigure(0, weight=1)
+        self.area.rowconfigure(0, weight=1)
+        self.area_lancamentos = self._painel(self.area, padx=20, pady=16)
         self.area_lancamentos.grid(row=0, column=0, sticky='nsew')
         self.area_grafico = self._painel(self.area, padx=24, pady=20)
         self.area_grafico.grid(row=0, column=0, sticky='nsew')
-        self.area.columnconfigure(0, weight=1)
-        self.area.rowconfigure(0, weight=1)
-        self._montar_lancamentos()
+        self._montar_tabela(self.area_lancamentos)
         self._montar_grafico()
+        self.lbl_aviso = self._texto(principal, 'Dica: duplo clique para editar  ·  Ctrl+N para novo lançamento',
+                                    fonte=(self.fonte, 9), cor=C['muted'], bg=C['bg'])
+        self.lbl_aviso.pack(anchor='w', pady=(10, 0))
         self.mostrar_aba(0)
-
-
-    def _aba(self, pai, texto, indice):
-        botao = tk.Button(pai, text=texto, font=self.fonte_forte, bd=0,
-                          relief='flat', padx=15, pady=10, cursor='hand2',
-                          command=lambda: self.mostrar_aba(indice))
-        botao.pack(side='left', padx=(0, 6))
-        return botao
 
     def mostrar_aba(self, indice):
         self.aba_atual = indice
@@ -186,29 +228,26 @@ class AppContas:
         else:
             self.area_grafico.tkraise()
             self.janela.after_idle(self.desenhar_grafico)
-        for i, botao in enumerate((self.btn_aba_contas, self.btn_aba_grafico)):
-            ativo = i == indice
-            botao.configure(bg=C['panel'] if ativo else C['bg'],
-                            fg=C['brand'] if ativo else C['muted'],
-                            activebackground=C['brand_soft'])
-
-    def _montar_lancamentos(self):
-        self.area_lancamentos.columnconfigure(0, weight=1)
-        self.area_lancamentos.columnconfigure(1, minsize=335)
-        self.area_lancamentos.rowconfigure(0, weight=1)
-        lista = self._painel(self.area_lancamentos, padx=16, pady=13)
-        lista.grid(row=0, column=0, sticky='nsew', padx=(0, 14))
-        painel_form = self._painel(self.area_lancamentos, padx=18, pady=12)
-        painel_form.grid(row=0, column=1, sticky='nsew')
-        self._montar_tabela(lista)
-        self._montar_formulario(painel_form)
+        for i, botao in enumerate(self.botoes_menu):
+            botao.configure(bg=C['navy_hover'] if i == indice else C['navy'],
+                            fg='#FFFFFF' if i == indice else '#C0CEE0')
 
     def _montar_tabela(self, pai):
         topo = tk.Frame(pai, bg=C['panel'])
         topo.pack(fill='x')
         self._texto(topo, 'Seus lançamentos', fonte=self.fonte_secao).pack(side='left')
         ttk.Button(topo, text='Exportar CSV', style='Secundario.TButton',
-                   command=self.exportar).pack(side='right')
+                   command=self.exportar).pack(side='right', padx=(6, 0))
+        self.btn_excluir = ttk.Button(topo, text='Excluir', style='Perigo.TButton',
+                                      command=self.excluir_selecionada)
+        self.btn_excluir.pack(side='right', padx=(6, 0))
+        self.btn_status = ttk.Button(topo, text='Marcar como pago',
+                                     style='Secundario.TButton',
+                                     command=self.alternar_status_selecionada)
+        self.btn_status.pack(side='right', padx=(6, 0))
+        self.btn_editar = ttk.Button(topo, text='Editar', style='Secundario.TButton',
+                                     command=self.editar_selecionada)
+        self.btn_editar.pack(side='right', padx=(6, 0))
 
         busca_linha = tk.Frame(pai, bg=C['panel'])
         busca_linha.pack(fill='x', pady=(11, 8))
@@ -244,6 +283,8 @@ class AppContas:
                                fg=C['brand'], bg=C['panel'], relief='flat', bd=0,
                                cursor='hand2', command=self.limpar_filtros)
         btn_limpar.pack(side='right', pady=5)
+        self.lbl_contagem = self._texto(filtros, '', fonte=self.fonte_pequena, cor=C['muted'])
+        self.lbl_contagem.pack(side='right', padx=(0, 13), pady=5)
 
         tabela_area = tk.Frame(pai, bg=C['panel'], highlightthickness=1,
                                highlightbackground=C['border'])
@@ -282,62 +323,94 @@ class AppContas:
                                     fonte=self.fonte_normal, cor=C['muted'],
                                     justify='center')
 
-        acoes = tk.Frame(pai, bg=C['panel'])
-        acoes.pack(fill='x', pady=(12, 1))
-        self.lbl_contagem = self._texto(acoes, '', fonte=self.fonte_pequena, cor=C['muted'])
-        self.lbl_contagem.pack(side='left', padx=(2, 8), pady=8)
-        self.btn_excluir = ttk.Button(acoes, text='Excluir', style='Perigo.TButton',
-                                      command=self.excluir_selecionada)
-        self.btn_excluir.pack(side='right', padx=(7, 0))
-        self.btn_status = ttk.Button(acoes, text='Marcar como pago',
-                                     style='Secundario.TButton',
-                                     command=self.alternar_status_selecionada)
-        self.btn_status.pack(side='right', padx=(7, 0))
-        self.btn_editar = ttk.Button(acoes, text='Editar', style='Secundario.TButton',
-                                     command=self.editar_selecionada)
-        self.btn_editar.pack(side='right')
         self._atualizar_acoes()
         self.var_busca.trace_add('write', lambda *args: (self._atualizar_placeholder(), self.atualizar_tela()))
 
-    def _campo(self, pai, rotulo, variavel, *, largura=28):
-        self._texto(pai, rotulo, fonte=self.fonte_forte).pack(anchor='w', pady=(7, 2))
+    def _campo(self, pai, rotulo, variavel):
+        self._texto(pai, rotulo, fonte=self.fonte_forte).pack(anchor='w', pady=(12, 6))
         entrada = tk.Entry(pai, textvariable=variavel, font=(self.fonte, 11),
                            bg=C['soft'], fg=C['text'], insertbackground=C['text'],
                            relief='flat', highlightthickness=1,
                            highlightbackground=C['border'], highlightcolor=C['brand'])
-        entrada.pack(fill='x', ipady=5)
+        entrada.pack(fill='x', ipady=9)
         return entrada
 
-    def _montar_formulario(self, pai):
-        # Ação principal fixa no rodapé, inclusive em telas menores.
-        self.btn_salvar = ttk.Button(pai, text='Adicionar lançamento',
-                                     style='Principal.TButton', command=self.salvar_formulario)
-        self.btn_salvar.pack(side='bottom', fill='x', pady=(10, 0))
-        cabecalho = tk.Frame(pai, bg=C['panel'])
-        cabecalho.pack(fill='x')
-        self.lbl_modo = self._texto(cabecalho, 'Novo lançamento', fonte=self.fonte_secao)
-        self.lbl_modo.pack(side='left')
-        self.btn_cancelar = tk.Button(cabecalho, text='Cancelar', font=self.fonte_pequena,
-                                      fg=C['brand'], bg=C['panel'], bd=0, relief='flat',
-                                      cursor='hand2', command=self.novo_lancamento)
-        self.btn_cancelar.pack(side='right')
-        self.lbl_ajuda = self._texto(pai, 'Preencha os dados e salve.',
-                                    fonte=self.fonte_pequena, cor=C['muted'])
-        self.lbl_ajuda.pack(anchor='w', pady=(2, 2))
-        self.entry_descricao = self._campo(pai, 'Descrição', self.var_descricao)
-        self.entry_valor = self._campo(pai, 'Valor (R$)', self.var_valor)
-        self.entry_vencimento = self._campo(pai, 'Vencimento (dd/mm/aaaa)', self.var_vencimento)
-        self._texto(pai, 'Tipo', fonte=self.fonte_forte).pack(anchor='w', pady=(7, 2))
-        self.combo_tipo = ttk.Combobox(pai, textvariable=self.var_tipo,
-                                       values=fm.TIPOS, state='readonly',
-                                       style='Filtros.TCombobox')
+    def _limpar_formulario(self):
+        self.id_edicao = None
+        self.var_descricao.set('')
+        self.var_valor.set('')
+        self.var_vencimento.set(date.today().strftime(fm.FORMATO_DATA))
+        self.var_tipo.set('Despesa')
+        self.var_status.set('Pendente')
+
+    def _fechar_modal(self):
+        if self.modal is not None:
+            modal = self.modal
+            self.modal = None
+            try:
+                modal.grab_release()
+                modal.destroy()
+            except tk.TclError:
+                pass
+        self._limpar_formulario()
+
+    def _abrir_formulario(self):
+        if self.modal is not None:
+            self._fechar_modal()
+        modal = tk.Toplevel(self.janela)
+        self.modal = modal
+        edicao = self.id_edicao is not None
+        modal.title(('Editar' if edicao else 'Novo') + ' lançamento — Fluxo')
+        self.janela.update_idletasks()
+        larg, alt = 510, 595
+        x = self.janela.winfo_rootx() + max(0, (self.janela.winfo_width() - larg) // 2)
+        y = self.janela.winfo_rooty() + max(0, (self.janela.winfo_height() - alt) // 2)
+        modal.geometry(f'{larg}x{alt}+{x}+{y}')
+        modal.minsize(460, 550)
+        modal.configure(bg=C['bg'])
+        modal.transient(self.janela)
+        modal.protocol('WM_DELETE_WINDOW', self._fechar_modal)
+        modal.grab_set()
+        corpo = tk.Frame(modal, bg=C['bg'], padx=23, pady=19)
+        corpo.pack(fill='both', expand=True)
+        self._texto(corpo, 'LANÇAMENTOS', fonte=(self.fonte, 9, 'bold'),
+                    cor=C['brand'], bg=C['bg']).pack(anchor='w')
+        self._texto(corpo, 'Editar lançamento' if edicao else 'Novo lançamento',
+                    fonte=(self.fonte, 22, 'bold'), cor=C['text'], bg=C['bg']).pack(anchor='w', pady=(3, 2))
+        self._texto(corpo, 'Altere os campos e salve.' if edicao else 'Registre uma nova receita ou despesa.',
+                    fonte=(self.fonte, 10), cor=C['muted'], bg=C['bg']).pack(anchor='w', pady=(0, 13))
+        formulario = self._painel(corpo, padx=20, pady=13)
+        formulario.pack(fill='both', expand=True)
+        self.entry_descricao = self._campo(formulario, 'Descrição', self.var_descricao)
+        self.entry_valor = self._campo(formulario, 'Valor (R$)', self.var_valor)
+        self.entry_vencimento = self._campo(formulario, 'Vencimento (dd/mm/aaaa)', self.var_vencimento)
+        opcoes = tk.Frame(formulario, bg=C['panel'])
+        opcoes.pack(fill='x', pady=(12, 1))
+        tipo_frame = tk.Frame(opcoes, bg=C['panel'])
+        tipo_frame.pack(side='left', fill='x', expand=True, padx=(0, 8))
+        status_frame = tk.Frame(opcoes, bg=C['panel'])
+        status_frame.pack(side='left', fill='x', expand=True)
+        self._texto(tipo_frame, 'Tipo', fonte=self.fonte_forte).pack(anchor='w', pady=(0, 6))
+        self.combo_tipo = ttk.Combobox(tipo_frame, textvariable=self.var_tipo,
+                                        values=fm.TIPOS, state='readonly', style='Filtros.TCombobox')
         self.combo_tipo.pack(fill='x')
-        self._texto(pai, 'Situação', fonte=self.fonte_forte).pack(anchor='w', pady=(7, 2))
-        self.combo_status = ttk.Combobox(pai, textvariable=self.var_status,
-                                         values=fm.STATUS_OPCOES, state='readonly',
-                                         style='Filtros.TCombobox')
+        self._texto(status_frame, 'Situação', fonte=self.fonte_forte).pack(anchor='w', pady=(0, 6))
+        self.combo_status = ttk.Combobox(status_frame, textvariable=self.var_status,
+                                          values=fm.STATUS_OPCOES, state='readonly', style='Filtros.TCombobox')
         self.combo_status.pack(fill='x')
+        rodape = tk.Frame(corpo, bg=C['bg'])
+        rodape.pack(fill='x', pady=(15, 0))
+        ttk.Button(rodape, text='Cancelar', style='Secundario.TButton',
+                   command=self._fechar_modal).pack(side='left')
+        ttk.Button(rodape, text='Salvar alterações' if edicao else 'Adicionar lançamento',
+                   style='Principal.TButton', command=self.salvar_formulario).pack(side='right')
         self.entry_valor.bind('<FocusOut>', self._formatar_valor)
+        modal.bind('<Escape>', lambda e: self._fechar_modal())
+        for entrada in (self.entry_descricao, self.entry_valor, self.entry_vencimento):
+            entrada.bind('<Return>', lambda e: self.salvar_formulario())
+        entrada_inicial = self.entry_descricao
+        modal.after_idle(lambda: entrada_inicial.focus_set()
+                         if self.modal is modal and entrada_inicial.winfo_exists() else None)
 
     def _montar_grafico(self):
         self._texto(self.area_grafico, 'Panorama mensal', fonte=self.fonte_secao).pack(anchor='w')
@@ -353,11 +426,9 @@ class AppContas:
             self._texto(legenda, texto, cor=C['muted']).pack(side='left')
 
     def _registrar_atalhos(self):
-        for entrada in (self.entry_descricao, self.entry_valor, self.entry_vencimento):
-            entrada.bind('<Return>', lambda evento: self.salvar_formulario())
-            entrada.bind('<KP_Enter>', lambda evento: self.salvar_formulario())
-        self.janela.bind('<Escape>', lambda evento: self.novo_lancamento())
-        self.janela.bind('<Control-f>', lambda evento: self.focar_busca())
+        self.janela.bind('<Control-n>', lambda e: self.novo_lancamento())
+        self.janela.bind('<Control-f>', lambda e: self.focar_busca())
+        self.janela.bind('<Escape>', lambda e: self._fechar_modal() if self.modal else None)
 
     def _carregar(self):
         try:
@@ -373,7 +444,7 @@ class AppContas:
             resultado = alterar(copia)
             fm.salvar_contas(copia, self.caminho)
         except (ValueError, OSError) as erro:
-            messagebox.showerror('Não foi possível salvar', str(erro), parent=self.janela)
+            messagebox.showerror('Não foi possível salvar', str(erro), parent=self.modal or self.janela)
             return False, None
         self.contas = copia
         return True, resultado
@@ -471,22 +542,11 @@ class AppContas:
                                           ('pendente' if conta['status'] == 'Pago' else 'pago'))
 
     def novo_lancamento(self, focar=True):
-        """Sempre volta ao cadastro — mesmo que uma conta estivesse sendo editada."""
-        self.id_edicao = None
-        self.var_descricao.set('')
-        self.var_valor.set('')
-        self.var_vencimento.set(date.today().strftime(fm.FORMATO_DATA))
-        self.var_tipo.set('Despesa')
-        self.var_status.set('Pendente')
-        self.lbl_modo.configure(text='Novo lançamento')
-        self.lbl_ajuda.configure(text='Preencha os dados e salve.')
-        self.btn_salvar.configure(text='Adicionar lançamento')
-        self.btn_cancelar.pack_forget()
-        if self.tabela.selection():
-            self.tabela.selection_remove(*self.tabela.selection())
-        self.mostrar_aba(0)
-        if focar:
-            self.entry_descricao.focus_set()
+        """Abre um formulário independente; não prende o usuário no modo edição."""
+        if self.modal is not None:
+            self._fechar_modal()
+        self._limpar_formulario()
+        self._abrir_formulario()
 
     def _formulario(self):
         return (self.var_descricao.get(), self.var_valor.get(), self.var_tipo.get(),
@@ -495,24 +555,22 @@ class AppContas:
     def salvar_formulario(self):
         dados = self._formulario()
         if self.id_edicao is None:
-            ok, conta = self._transacao(lambda lista: fm.adicionar_conta(lista, *dados))
-            aviso = 'Lançamento adicionado.'
+            ok, _ = self._transacao(lambda lista: fm.adicionar_conta(lista, *dados))
+            aviso = 'Lançamento adicionado com sucesso.'
         else:
             numero = self.id_edicao
             if fm.buscar_conta(self.contas, numero) is None:
                 messagebox.showwarning('Conta não encontrada', 'Essa conta não existe mais.',
-                                       parent=self.janela)
-                self.novo_lancamento()
+                                       parent=self.modal or self.janela)
+                self._fechar_modal()
                 return
-            ok, conta = self._transacao(lambda lista: fm.editar_conta(lista, numero, *dados))
-            aviso = 'Alterações salvas. Pronto para cadastrar outra conta.'
+            ok, _ = self._transacao(lambda lista: fm.editar_conta(lista, numero, *dados))
+            aviso = 'Alterações salvas. Você já pode criar outra conta.'
         if not ok:
             return
-        self.novo_lancamento(focar=False)
+        self._fechar_modal()
         self.atualizar_tela()
-        self._avisar(aviso)
-        if self._filtros_ativos():
-            self._avisar(aviso + ' Confira os filtros se não encontrar o registro.')
+        self._avisar(aviso + (' Confira os filtros.' if self._filtros_ativos() else ''))
 
     def editar_selecionada(self):
         numero = self._id_tabela()
@@ -521,18 +579,15 @@ class AppContas:
         conta = fm.buscar_conta(self.contas, numero)
         if conta is None:
             return
+        if self.modal is not None:
+            self._fechar_modal()
         self.id_edicao = numero
         self.var_descricao.set(conta['descricao'])
         self.var_valor.set(fm.formatar_numero(conta['valor']))
         self.var_vencimento.set(conta['vencimento'])
         self.var_tipo.set(conta['tipo'])
         self.var_status.set(conta['status'])
-        self.lbl_modo.configure(text='Editar lançamento')
-        self.lbl_ajuda.configure(text=f'Conta #{numero} · altere os dados e salve.')
-        self.btn_salvar.configure(text='Salvar alterações')
-        self.btn_cancelar.pack(side='right')
-        self.mostrar_aba(0)
-        self.entry_descricao.focus_set()
+        self._abrir_formulario()
         self.entry_descricao.select_range(0, 'end')
 
     def alternar_status_selecionada(self):
@@ -543,7 +598,7 @@ class AppContas:
         if not ok:
             return
         if self.id_edicao == numero:
-            self.novo_lancamento(focar=False)
+            self._limpar_formulario()
         self.atualizar_tela()
         self._avisar('Conta marcada como ' + status.lower() + '.')
 
@@ -562,7 +617,7 @@ class AppContas:
         if not ok:
             return
         if self.id_edicao == numero:
-            self.novo_lancamento(focar=False)
+            self._limpar_formulario()
         self.atualizar_tela()
         self._avisar('Lançamento excluído.')
 
@@ -615,7 +670,7 @@ class AppContas:
         if self._aviso_agendado is not None:
             self.janela.after_cancel(self._aviso_agendado)
         self._aviso_agendado = self.janela.after(6500, lambda: self.lbl_aviso.configure(
-            text='Resumo atualizado com os filtros', fg=C['muted']))
+            text='Dica: duplo clique para editar  ·  Ctrl+N para novo lançamento', fg=C['muted']))
 
     def desenhar_grafico(self):
         canvas = self.grafico

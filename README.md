@@ -1,77 +1,83 @@
-# Fluxo. — Contas a Pagar e Receber
+# fluxo.
 
-**Um controle financeiro desktop, simples de usar e feito inteiramente em Python.** Cadastre receitas e despesas, acompanhe vencimentos e entenda quanto já entrou, quanto saiu e o que ainda falta pagar ou receber — em uma interface clara, sem planilhas complicadas.
+**Contas a pagar e receber, em um aplicativo desktop simples e organizado.**
 
-![Tela principal do Fluxo, com dados fictícios de novembro e dezembro de 2026](docs/img/tela-principal.webp)
+O **Fluxo** é um projeto de programação em Python que permite registrar receitas e despesas, acompanhar vencimentos e visualizar a situação financeira sem depender de internet, planilhas ou cadastro em uma plataforma. A interface foi feita com **Tkinter**; os lançamentos são guardados no próprio computador, em um arquivo TXT.
 
-> **Experimente sem configurar nada:** na primeira execução, o Fluxo carrega exemplos fictícios de **novembro e dezembro de 2026**. São lançamentos para demonstração, não dados reais. Você pode editar, excluir e adicionar suas próprias contas.
+![Tela principal do Fluxo mostrando saldo, contas e lançamentos fictícios](docs/img/tela-principal.webp)
 
-## O que dá para fazer
+> **Quer testar?** A primeira execução já abre com **18 contas fictícias de novembro e dezembro de 2026** para conhecer a interface. São apenas exemplos, que podem ser editados ou excluídos.
 
-| Recurso | Na prática |
-| --- | --- |
-| **Visão geral** | Saldo realizado, valores a receber/a pagar e contas atrasadas |
-| **Lançamentos** | Criar, editar, excluir, marcar como pago ou reabrir |
-| **Organização** | Busca sem distinção de acentos, filtros por tipo, situação e mês, ordenação nas colunas |
-| **Gráfico mensal** | Comparar receitas e despesas previstas em cada mês |
-| **Exportação** | Gerar relatório `.csv` para abrir no Excel |
-| **Dados locais** | Informações salvas automaticamente em `contas.txt`, sem conta online nem banco de dados |
+## O que você consegue fazer
 
-![Gráfico mensal do Fluxo com dados fictícios](docs/img/grafico-mensal.webp)
+- **Registrar receitas e despesas:** criar, editar, excluir e marcar lançamentos como pagos ou pendentes.
+- **Acompanhar a situação:** saldo realizado, valores a receber e a pagar, além de contas vencidas.
+- **Encontrar lançamentos:** busca por descrição, filtros por tipo, situação e mês, e ordenação por coluna.
+- **Visualizar o histórico:** gráfico mensal de receitas e despesas, desenhado no `Canvas` do Tkinter.
+- **Exportar um relatório:** salvar a tabela filtrada em `.csv`, para abrir no Excel.
+- **Usar offline:** todos os registros ficam no `contas.txt`, sem banco de dados nem dependências externas.
 
-## Baixar e executar
+### Conheça as telas
 
-**Requisitos:** Python 3.8 ou superior, com Tkinter (normalmente incluído no instalador do Windows). Não é necessário `pip install`.
+| Criar ou editar um lançamento | Ver receitas e despesas por mês |
+| :---: | :---: |
+| ![Janela de cadastro do Fluxo](docs/img/novo-lancamento.webp) | ![Gráfico mensal com os exemplos de novembro e dezembro de 2026](docs/img/grafico-mensal.webp) |
 
-1. Clique em **Code → Download ZIP** neste repositório e extraia a pasta; ou clone com `git clone https://github.com/palomagl/projetos-contas-gui.git`.
-2. Abra a pasta no **PyCharm** (ou outro editor) e configure um interpretador Python.
-3. Execute `main.py` pelo botão **Run** ou pelo terminal:
+**A edição não bloqueia o cadastro:** você seleciona uma conta e clica em **Editar** (ou dá dois cliques na linha). Depois de salvar, a janela fecha e o botão **Novo lançamento** já fica livre para o próximo registro. Os botões de editar, pagar e excluir aparecem próximos da lista.
+
+## Como baixar e executar
+
+**Requisitos:** Python 3.8 ou mais recente, com Tkinter. No Windows, ele normalmente já está disponível na instalação do Python. **Não precisa executar `pip install`.**
+
+1. Clique em **Code → Download ZIP** no topo deste repositório e extraia o arquivo. Se preferir, clone com `git clone https://github.com/palomagl/projetos-contas-gui.git`.
+2. Abra a pasta extraída no **PyCharm** (ou no seu editor de preferência).
+3. Execute o arquivo **`main.py`**. Também dá para iniciar pelo terminal, dentro da pasta do projeto:
 
 ```bash
 python main.py
 ```
 
-No Windows, caso `python` não seja reconhecido, execute `py main.py`.
+No Windows, se `python` não funcionar, experimente `py main.py`. Caso o PyCharm esteja apontando para um interpretador antigo, rodar pelo terminal é uma alternativa.
 
 ### Dados de demonstração e dados pessoais
 
-- Na **primeira execução**, se não existir `contas.txt`, o sistema copia os exemplos de `docs/exemplo_contas.txt` para o arquivo local.
-- Se `contas.txt` já existir, **ele nunca será substituído por exemplos**, mesmo que esteja vazio.
-- Para começar do zero, feche o aplicativo, abra `contas.txt` ao lado de `main.py` e apague seu conteúdo (mantenha o arquivo vazio).
-- Para voltar à demonstração, feche o aplicativo e copie o conteúdo de `docs/exemplo_contas.txt` para `contas.txt` (faça um backup antes se tiver dados reais).
-- O `contas.txt` está no `.gitignore` para impedir o envio acidental de lançamentos pessoais ao GitHub.
+Na **primeira execução**, se ainda não existir o arquivo `contas.txt`, o programa cria um automaticamente a partir de `docs/exemplo_contas.txt`. Depois disso, **não substitui um arquivo existente**, mesmo que ele esteja vazio. O arquivo de dados está no `.gitignore` para não publicar suas contas no GitHub.
 
-## Uso rápido
-
-**Novo lançamento:** preencha os campos à direita e clique em **Adicionar lançamento**. Para editar, selecione uma linha e clique em **Editar** (ou dê dois cliques); depois de salvar, o formulário fica livre para uma nova conta. Um clique simples na tabela **não inicia a edição**.
-
-Use a busca e os filtros para encontrar registros. Para pagamentos, selecione a conta e escolha **Marcar como pago**. O saldo realizado considera somente receitas recebidas e despesas pagas; valores pendentes aparecem separadamente. Os indicadores e o gráfico acompanham os filtros aplicados.
-
-**Atalhos:** `Ctrl+F` pesquisar · `Enter` salvar no formulário · `Esc` novo lançamento/cancelar edição · `Delete` excluir a conta selecionada na tabela.
+Se quiser voltar à demonstração, feche o programa e copie o conteúdo de `docs/exemplo_contas.txt` para o `contas.txt` (faça uma cópia de segurança antes, se tiver informações suas). Para começar com a lista vazia, deixe `contas.txt` vazio.
 
 ## Tecnologias e organização
 
-- **Python 3.8+** e **Tkinter/ttk**: interface nativa, sem dependências extras.
-- **Listas, tuplas e dicionários**: gerenciamento dos lançamentos em memória.
-- **TXT local**: persistência com gravação atômica, sem banco de dados.
-- **Testes `unittest`**: validação, cálculo, filtros e persistência.
+| Parte | Tecnologia |
+| --- | --- |
+| Aplicação e interface | Python 3.8+, Tkinter e ttk |
+| Regras financeiras | Listas, tuplas, dicionários e funções Python |
+| Salvamento | Arquivo local `.txt`, com gravação atômica |
+| Gráfico | Tkinter `Canvas` |
+| Testes | `unittest` (biblioteca padrão) |
 
 ```text
 projeto_contas_gui/
-├── main.py                   # inicia a aplicação e prepara exemplos no primeiro uso
-├── views/app_gui.py          # tela, formulários e gráfico Canvas
-├── services/finance_manager.py  # regras, filtros e arquivo TXT
+├── main.py                      # ponto de entrada
+├── services/
+│   └── finance_manager.py       # CRUD, validações, cálculos, filtros e TXT
+├── views/
+│   └── app_gui.py               # interface e gráfico
 ├── docs/
-│   ├── img/                 # capturas da aplicação
-│   ├── exemplo_contas.txt   # lançamentos fictícios nov/dez 2026
-│   └── estrutura_dados.md   # explicação para a disciplina
-└── tests/test_finance_manager.py
+│   ├── img/                     # capturas reais do aplicativo
+│   ├── exemplo_contas.txt       # dados fictícios nov/dez 2026
+│   └── estrutura_dados.md       # documentação para a disciplina
+└── tests/
+    └── test_finance_manager.py  # testes das regras de negócio
 ```
 
-Para rodar os testes:
+Para executar os testes:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-> Projeto acadêmico de **Programação em Python**, desenvolvido para exercitar operações CRUD, estruturas de dados, persistência local e construção de interfaces. As capturas acima apresentam dados fictícios.
+**Atalhos:** `Ctrl+N` novo lançamento · `Ctrl+F` busca · `Enter` salva o formulário · `Esc` fecha o formulário · `Delete` exclui a conta selecionada.
+
+---
+
+Projeto acadêmico desenvolvido para a disciplina de **Programação em Python**. As imagens e os lançamentos apresentados são fictícios e foram criados para demonstrar a aplicação.
