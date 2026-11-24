@@ -4,7 +4,9 @@
 
 O **Fluxo** é um projeto de programação em Python que permite registrar receitas e despesas, acompanhar vencimentos e visualizar a situação financeira sem depender de internet, planilhas ou cadastro em uma plataforma. A interface foi feita com **Tkinter**; os lançamentos são guardados no próprio computador, em um arquivo TXT.
 
-![Tela principal do Fluxo mostrando saldo, contas e lançamentos fictícios](docs/img/tela-principal.webp)
+![Tela real do Fluxo em execução no Windows, com saldo, indicadores e lançamentos](docs/img/tela-real-windows.webp)
+
+*Captura da aplicação em execução no Windows, utilizando dados fictícios de novembro e dezembro de 2026.*
 
 > **Quer testar?** A primeira execução já abre com **18 contas fictícias de novembro e dezembro de 2026** para conhecer a interface. São apenas exemplos, que podem ser editados ou excluídos.
 
